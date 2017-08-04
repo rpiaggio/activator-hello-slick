@@ -1,4 +1,5 @@
-import slick.dbio.{DBIOAction, NoStream}
+import slick.basic.DatabasePublisher
+import slick.dbio.{DBIOAction, NoStream, Streaming}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import slick.jdbc.H2Profile.api._
@@ -46,10 +47,17 @@ object Demo {
   def execute[R](a: DBIOAction[R, NoStream, Nothing]): Future[R] = {
     val future = db.run(a)
     future.onComplete{
-      case Success(result) => println; println(result)
+      case Success(result) => println(); println(result)
       case Failure(t) => t.printStackTrace()
     }
     future
   }
 
+  def stream[R](a: DBIOAction[_, Streaming[R], Nothing]): DatabasePublisher[R] = {
+    val publisher = db.stream(a)
+    println()
+    println()
+    publisher.foreach(println)
+    publisher
+  }
 }
